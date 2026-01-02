@@ -1,4 +1,4 @@
-# SKILLTERN Login Page
+# Skill-TERN Login Page
 
 A modern React TypeScript login component with Tailwind CSS, featuring a frosted glass effect and role-based authentication.
 
