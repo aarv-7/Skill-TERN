@@ -1,5 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from "recharts";
+
+const applicationData = [
+  { month: "Jan", applied: 4, shortlisted: 2, rejected: 1 },
+  { month: "Feb", applied: 7, shortlisted: 3, rejected: 2 },
+  { month: "Mar", applied: 5, shortlisted: 2, rejected: 2 },
+  { month: "Apr", applied: 10, shortlisted: 5, rejected: 3 },
+  { month: "May", applied: 8, shortlisted: 4, rejected: 2 },
+  { month: "Jun", applied: 12, shortlisted: 6, rejected: 4 },
+];
 
 type View = 'dashboard' | 'explore' | 'applications' | 'applied-internship' | 'ai-recommendation' | 'ai-suggestions' | 'resume' | 'edit-cv' | 'connect-profiles' | 'add-projects';
 
@@ -37,10 +56,67 @@ const StudentsDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-7">
         {currentView === 'dashboard' && (
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Student Dashboard</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Student Dashboard</h2>
             <h2 className="text-xl font-regular text-gray-800 mb-8">👋 Welcome back, Student</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* GRAPH SECTION */}
+  <div className="bg-white rounded-2xl p-12 shadow-md mb-16">
+    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+      Application Activity
+    </h3>
+
+    <div className="h-72">
+      <ResponsiveContainer width="100%" height={320}>
+  <LineChart data={applicationData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+    <XAxis dataKey="month" />
+    <YAxis />
+    <Tooltip
+      contentStyle={{
+        backgroundColor: "white",
+        borderRadius: "10px",
+        border: "1px solid #e5e7eb",
+      }}
+    />
+    <Legend />
+
+    {/* Total Applications */}
+    <Line
+      type="monotone"
+      dataKey="applied"
+      stroke="#2563eb"
+      strokeWidth={3}
+      dot={{ r: 4 }}
+      activeDot={{ r: 7 }}
+      name="Applied"
+    />
+
+    {/* Shortlisted */}
+    <Line
+      type="monotone"
+      dataKey="shortlisted"
+      stroke="#16a34a"
+      strokeWidth={3}
+      dot={{ r: 4 }}
+      name="Shortlisted"
+    />
+
+    {/* Rejected */}
+    <Line
+      type="monotone"
+      dataKey="rejected"
+      stroke="#dc2626"
+      strokeWidth={3}
+      dot={{ r: 4 }}
+      name="Rejected"
+    />
+  </LineChart>
+</ResponsiveContainer>
+    </div>
+  </div>
+
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20">
               {/* Explore Internships Card */}
               <div
                 onClick={() => setCurrentView('explore')}
