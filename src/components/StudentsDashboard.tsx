@@ -34,10 +34,11 @@ const StudentsDashboard = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-7">
         {currentView === 'dashboard' && (
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Students Dashboard</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-8">Student Dashboard</h2>
+            <h2 className="text-xl font-regular text-gray-800 mb-8">👋 Welcome back, Student</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Explore Internships Card */}

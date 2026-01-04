@@ -29,19 +29,36 @@ const Login = () => {
       return;
     }
     
-    // Handle login logic here
-    console.log('=== LOGIN ATTEMPT ===');
-    console.log('Role:', role);
-    console.log('Email:', emailValue);
-    console.log('Password:', passwordValue);
-    
-    // Navigate based on role
-    if (role === 'student') {
-      navigate('/student');
-    } else if (role === 'recruiter') {
-      navigate('/recruiter');
-    }
+    // Demo Credentials
+    const DEMO = {
+    student: {
+      email: 'student@skilltern.com',
+      password: 'student123',
+      route: '/student',
+    },
+    recruiter: {
+      email: 'recruiter@skilltern.com',
+      password: 'recruiter123',
+      route: '/recruiter',
+    },
   };
+
+  const activeDemo = DEMO[role];
+
+  if (
+    emailValue === activeDemo.email &&
+    passwordValue === activeDemo.password
+  ) {
+    console.log('✅ Demo login success:', role);
+    navigate(activeDemo.route);
+  } else {
+    alert(
+      `Invalid demo credentials.\n\n` +
+      `Student → student@skilltern.com / student123\n` +
+      `Recruiter → recruiter@skilltern.com / recruiter123`
+    );
+  }
+};
 
   const handleSignUp = () => {
     // Handle sign up navigation
@@ -77,7 +94,8 @@ const Login = () => {
         >
           <h2 className="text-2xl font-bold text-black mb-4">Login</h2>
           <p className="text-sm text-gray-600 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-200">
-            💡 <strong>Demo Mode</strong>
+            💡 <strong>Demo Credentials</strong><h2>Student → student@skilltern.com / student123<br />
+                   Recruiter → recruiter@skilltern.com / recruiter123</h2>
           </p>
 
           {/* Role Toggle */}
