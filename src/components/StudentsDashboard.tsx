@@ -75,7 +75,7 @@ const actions = [
 ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-[100vh] w-full">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-lg shadow-md border-b border-white/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -93,16 +93,16 @@ const actions = [
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-7">
+        <div className="flex gap-6 items-stretch"></div>
         {currentView === 'dashboard' && (
           <div>
             <h2 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h2>
-            {/* <h2 className="text-xl font-regular text-gray-800 mb-6">👋 Welcome back, Student</h2> */}
             
             {/* Main Container - Split Left and Right */}
             <div className="flex gap-6 h-[calc(100vh-200px)]">
               
               {/* LEFT HALF - RADAR GRAPH SECTION */}
-              <div className="w-1/2 bg-white rounded-2xl p-8 shadow-md flex flex-col">
+              <div className="w-1/2 bg-white rounded-2xl p-6 shadow-md flex flex-col h-full">
                 <h3 className="text-2xl font-semibold text-gray-800 mb-1">
                   Profile Evaluation
                 </h3>
@@ -142,7 +142,7 @@ const actions = [
               {/* RIGHT HALF - BUTTONS SECTION */}
               <div className="w-1/2 flex justify-start">
               <div className="flex flex-col-2 gap-10 w-[540px]">
-                <div className="grid grid-cols-2 gap-10">
+                <div className="grid grid-cols-2 gap-5">
                   {/* AI INSIGHTS CARD */}
               <div className="col-span-2 bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-md border border-white/70">
               <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">🧠 AI Insights</h3> 
@@ -152,13 +152,8 @@ const actions = [
               {insights.map((insight, index) => (
              <li
              key={index}
-             className={`text-sm flex items-start gap-2 ${
-            insight.type === "good"
-            ? "text-green-700"
-            : insight.type === "warning"
-            ? "text-orange-700"
-            : "text-blue-700"
-            }`}>
+             className={`text-sm flex items-start gap-2 ${ insight.type === "good" ? "text-green-700" : insight.type === "warning" ? "text-orange-700": "text-blue-700"}`}
+             >
             <span>•</span>
             <span>{insight.text}</span>
             </li>
