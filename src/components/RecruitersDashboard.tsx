@@ -1,19 +1,15 @@
 import { useState } from 'react';
-//import { useNavigate } from 'react-router-dom';
-
-interface RecruitersDashboardProps {
-  onLogout: () => void;
-}
+import { useNavigate } from 'react-router-dom';
 
 type View = 'dashboard' | 'post-internship' | 'view-applications' | 'ai-shortlisting' | 'manual-screening' | 'statistics';
 
-const RecruitersDashboard = ({ onLogout }: RecruitersDashboardProps) => {
-  //const navigate = useNavigate();
+const RecruitersDashboard = () => {
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [applications] = useState([
-    { id: 1, name: 'Rishabh Shah', email: 'rishi@example.com', status: 'pending', score: 85 },
-    { id: 2, name: 'Rakshit Chauhan', email: 'rakshit@example.com', status: 'pending', score: 92 },
-    { id: 3, name: 'Neleema Bansal', email: 'neelema@example.com', status: 'rejected', score: 65 },
+    { id: 1, name: 'John Doe', email: 'john@example.com', status: 'pending', score: 85 },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'pending', score: 92 },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'rejected', score: 65 },
   ]);
 
   return (
@@ -22,11 +18,11 @@ const RecruitersDashboard = ({ onLogout }: RecruitersDashboardProps) => {
       <header className="bg-white/80 backdrop-blur-lg shadow-md border-b border-white/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-blue-600">Skill-TERN</h1>
+            <h1 className="text-3xl font-bold text-blue-600">SKILLTERN</h1>
             <span className="text-sm text-gray-600 bg-blue-100 px-3 py-1 rounded-full">Recruiter</span>
           </div>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => navigate('/')}
             className="px-4 py-2 text-gray-700 hover:text-blue-600 transition-colors"
           >
             Logout

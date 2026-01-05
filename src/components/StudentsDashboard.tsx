@@ -57,130 +57,141 @@ const StudentsDashboard = () => {
         {currentView === 'dashboard' && (
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Student Dashboard</h2>
-            <h2 className="text-xl font-regular text-gray-800 mb-8">👋 Welcome back, Student</h2>
+            <h2 className="text-xl font-regular text-gray-800 mb-6">👋 Welcome back, Student</h2>
             
-            {/* GRAPH SECTION */}
-  <div className="bg-white rounded-2xl p-12 shadow-md mb-16">
-    <h3 className="text-xl font-semibold text-gray-800 mb-4">
-      Application Activity
-    </h3>
+            {/* Main Container - Split Left and Right */}
+            <div className="flex gap-6 h-[calc(100vh-200px)]">
+              
+              {/* LEFT HALF - GRAPH SECTION */}
+              <div className="w-1/2 bg-white rounded-2xl p-8 shadow-md flex flex-col">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  Application Activity
+                </h3>
 
-    <div className="h-72">
-      <ResponsiveContainer width="100%" height={320}>
-  <LineChart data={applicationData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-    <XAxis dataKey="month" />
-    <YAxis />
-    <Tooltip
-      contentStyle={{
-        backgroundColor: "white",
-        borderRadius: "10px",
-        border: "1px solid #e5e7eb",
-      }}
-    />
-    <Legend />
+                <div className="flex-1 min-h-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={applicationData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "white",
+                          borderRadius: "10px",
+                          border: "1px solid #e5e7eb",
+                        }}
+                      />
+                      <Legend />
 
-    {/* Total Applications */}
-    <Line
-      type="monotone"
-      dataKey="applied"
-      stroke="#2563eb"
-      strokeWidth={3}
-      dot={{ r: 4 }}
-      activeDot={{ r: 7 }}
-      name="Applied"
-    />
+                      {/* Total Applications */}
+                      <Line
+                        type="monotone"
+                        dataKey="applied"
+                        stroke="#2563eb"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 7 }}
+                        name="Applied"
+                      />
 
-    {/* Shortlisted */}
-    <Line
-      type="monotone"
-      dataKey="shortlisted"
-      stroke="#16a34a"
-      strokeWidth={3}
-      dot={{ r: 4 }}
-      name="Shortlisted"
-    />
+                      {/* Shortlisted */}
+                      <Line
+                        type="monotone"
+                        dataKey="shortlisted"
+                        stroke="#16a34a"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        name="Shortlisted"
+                      />
 
-    {/* Rejected */}
-    <Line
-      type="monotone"
-      dataKey="rejected"
-      stroke="#dc2626"
-      strokeWidth={3}
-      dot={{ r: 4 }}
-      name="Rejected"
-    />
-  </LineChart>
-</ResponsiveContainer>
-    </div>
-  </div>
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20">
-              {/* Explore Internships Card */}
-              <div
-                onClick={() => setCurrentView('explore')}
-                className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-800">Explore Internships</h3>
+                      {/* Rejected */}
+                      <Line
+                        type="monotone"
+                        dataKey="rejected"
+                        stroke="#dc2626"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        name="Rejected"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-                <p className="text-gray-600 text-sm">Browse available internship opportunities</p>
               </div>
 
-              {/* My Applications Card */}
-              <div
-                onClick={() => setCurrentView('applications')}
-                className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-green-100 p-3 rounded-lg">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+              {/* RIGHT HALF - BUTTONS SECTION - Vertically Aligned */}
+              <div className="w-1/2 flex justify-start">
+              <div className="flex flex-col-2 gap-10 w-[540px]">
+                <div className="grid grid-cols-2 gap-10">
+                  <div className="h-12"/>
+                  <div className="h-12"/>
+                {/* Explore Internships Card */}
+                <div
+                  onClick={() => setCurrentView('explore')}
+                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/80 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="bg-blue-100 p-3 rounded-lg">
+                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">Explore Internships</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800">My Applications</h3>
+                  <p className="text-gray-600 text-sm">Browse available internship opportunities</p>
                 </div>
-                <p className="text-gray-600 text-sm">Track your internship applications</p>
-              </div>
 
-              {/* AI Suggestions Card */}
-              <div
-                onClick={() => setCurrentView('ai-suggestions')}
-                className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-purple-100 p-3 rounded-lg">
-                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
+                {/* My Applications Card */}
+                <div
+                  onClick={() => setCurrentView('applications')}
+                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="bg-green-100 p-3 rounded-lg">
+                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">My Applications</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800">AI Suggestions</h3>
+                  <p className="text-gray-600 text-sm">Track your internship applications</p>
                 </div>
-                <p className="text-gray-600 text-sm">Get personalized internship recommendations</p>
-              </div>
 
-              {/* My Resume Card */}
-              <div
-                onClick={() => setCurrentView('resume')}
-                className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-orange-100 p-3 rounded-lg">
-                    <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                {/* AI Suggestions Card */}
+                <div
+                  onClick={() => setCurrentView('ai-suggestions')}
+                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="bg-purple-100 p-3 rounded-lg">
+                      <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">AI Suggestions</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800">My Resume</h3>
+                  <p className="text-gray-600 text-sm">Get personalized internship recommendations</p>
                 </div>
-                <p className="text-gray-600 text-sm">Manage and enhance your resume</p>
+
+                {/* My Resume Card */}
+                <div
+                  onClick={() => setCurrentView('resume')}
+                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="bg-orange-100 p-3 rounded-lg">
+                      <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">My Resume</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm">Manage and enhance your resume</p>
+                </div>
+                </div>
               </div>
             </div>
+            
+          </div>
           </div>
         )}
 
