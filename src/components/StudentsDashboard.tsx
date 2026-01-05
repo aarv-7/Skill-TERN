@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
   ResponsiveContainer,
-  Legend
+  Legend,
+  Tooltip
 } from "recharts";
 
-const applicationData = [
-  { month: "Jan", applied: 4, shortlisted: 2, rejected: 1 },
-  { month: "Feb", applied: 7, shortlisted: 3, rejected: 2 },
-  { month: "Mar", applied: 5, shortlisted: 2, rejected: 2 },
-  { month: "Apr", applied: 10, shortlisted: 5, rejected: 3 },
-  { month: "May", applied: 8, shortlisted: 4, rejected: 2 },
-  { month: "Jun", applied: 12, shortlisted: 6, rejected: 4 },
+const radarData = [
+  { metric: "Resume", score: 72 },
+  { metric: "Skills", score: 80 },
+  { metric: "Projects", score: 65 },
+  { metric: "AI Match", score: 78 },
+  { metric: "Consistency", score: 60 },
+  { metric: "Interview", score: 70 },
 ];
 
 type View = 'dashboard' | 'explore' | 'applications' | 'applied-internship' | 'ai-recommendation' | 'ai-suggestions' | 'resume' | 'edit-cv' | 'connect-profiles' | 'add-projects';
@@ -35,6 +35,45 @@ const StudentsDashboard = () => {
     { id: 2, title: 'Data Science Intern', company: 'Data Inc', status: 'pending' },
   ]);
 
+  const radarScores = {
+  Resume: 72,
+  Skills: 78,
+  Projects: 60,
+  "AI Match": 75,
+  Consistency: 55,
+  Interview: 68,
+};
+
+const insights = [
+  {
+    type: "good",
+    text: "Strong resume and skills profile",
+  },
+  {
+    type: "warning",
+    text: "Projects section needs stronger real-world impact",
+  },
+  {
+    type: "info",
+    text: "Interview readiness can be improved with mock practice",
+  },
+];
+
+const actions = [
+  {
+    label: "Improve Resume",
+    action: () => setCurrentView("resume"),
+  },
+  {
+    label: "Add Projects",
+    action: () => setCurrentView("add-projects"),
+  },
+  {
+    label: "View AI Suggestions",
+    action: () => setCurrentView("ai-suggestions"),
+  },
+];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -42,7 +81,7 @@ const StudentsDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-blue-600">Skill-TERN</h1>
-            <span className="text-sm text-gray-600 bg-green-100 px-3 py-1 rounded-full">Student</span>
+            <span className="text-sm text-gray-600 bg-blue-100 px-3 py-1 rounded-full">Student</span>
           </div>
           <button
             onClick={() => navigate('/')}
@@ -56,80 +95,99 @@ const StudentsDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-7">
         {currentView === 'dashboard' && (
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Student Dashboard</h2>
-            <h2 className="text-xl font-regular text-gray-800 mb-6">👋 Welcome back, Student</h2>
+            <h2 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h2>
+            {/* <h2 className="text-xl font-regular text-gray-800 mb-6">👋 Welcome back, Student</h2> */}
             
             {/* Main Container - Split Left and Right */}
             <div className="flex gap-6 h-[calc(100vh-200px)]">
               
-              {/* LEFT HALF - GRAPH SECTION */}
+              {/* LEFT HALF - RADAR GRAPH SECTION */}
               <div className="w-1/2 bg-white rounded-2xl p-8 shadow-md flex flex-col">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                  Application Activity
+                <h3 className="text-2xl font-semibold text-gray-800 mb-1">
+                  Profile Evaluation
                 </h3>
+                <p className="text-lg text-gray-500 mb-4">
+                  AI-based multi-dimensional student assessment
+                </p>
 
                 <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={applicationData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "white",
-                          borderRadius: "10px",
-                          border: "1px solid #e5e7eb",
-                        }}
-                      />
+                    <RadarChart data={radarData}>
+                    <PolarGrid stroke="#e5e7eb" />
+                     <PolarAngleAxis dataKey="metric" tick={{ fill: "#23272eff", fontSize: 17 }}/>
+                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false}/>
+                      <Tooltip />
+
+                     <Radar
+                     name="Score"
+                     dataKey="score"
+                     stroke="#2563eb"
+                     fill="#2563eb"
+                     fillOpacity={0.4}
+                     />
                       <Legend />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                    </div>
 
-                      {/* Total Applications */}
-                      <Line
-                        type="monotone"
-                        dataKey="applied"
-                        stroke="#2563eb"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                        activeDot={{ r: 7 }}
-                        name="Applied"
-                      />
-
-                      {/* Shortlisted */}
-                      <Line
-                        type="monotone"
-                        dataKey="shortlisted"
-                        stroke="#16a34a"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                        name="Shortlisted"
-                      />
-
-                      {/* Rejected */}
-                      <Line
-                        type="monotone"
-                        dataKey="rejected"
-                        stroke="#dc2626"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                        name="Rejected"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                      {/* Overall Score */}
+                     <div className="mt-4 flex justify-center gap-6">
+                     <div className="text-center">
+                    <p className="text-3xl font-bold text-blue-600">71</p>
+                   <p className="text-sm text-gray-500">Overall Score</p>
+                  </div>
+                 </div>
                 </div>
-              </div>
 
-              {/* RIGHT HALF - BUTTONS SECTION - Vertically Aligned */}
+              {/* RIGHT HALF - BUTTONS SECTION */}
               <div className="w-1/2 flex justify-start">
               <div className="flex flex-col-2 gap-10 w-[540px]">
                 <div className="grid grid-cols-2 gap-10">
-                  <div className="h-12"/>
-                  <div className="h-12"/>
+                  {/* AI INSIGHTS CARD */}
+              <div className="col-span-2 bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-md border border-white/70">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">🧠 AI Insights</h3> 
+
+              {/* Insights */}
+              <ul className="space-y-2 mb-4">
+              {insights.map((insight, index) => (
+             <li
+             key={index}
+             className={`text-sm flex items-start gap-2 ${
+            insight.type === "good"
+            ? "text-green-700"
+            : insight.type === "warning"
+            ? "text-orange-700"
+            : "text-blue-700"
+            }`}>
+            <span>•</span>
+            <span>{insight.text}</span>
+            </li>
+            ))} </ul>
+
+           {/* Divider */}
+           <div className="h-px bg-gray-200 my-3" />
+
+           {/* Next Actions */}
+           <h4 className="text-sm font-semibold text-gray-700 mb-2"> 🎯 Next Best Actions </h4>
+
+            <div className="flex flex-wrap gap-2">
+            {actions.map((item, index) => (
+            <button
+             key={index}
+             onClick={item.action}
+              className="text-xs px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+             {item.label}
+             </button>
+              ))}
+             </div>
+              </div>
+                  
                 {/* Explore Internships Card */}
                 <div
                   onClick={() => setCurrentView('explore')}
                   className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/80 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-7">
                     <div className="bg-blue-100 p-3 rounded-lg">
                       <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -145,7 +203,7 @@ const StudentsDashboard = () => {
                   onClick={() => setCurrentView('applications')}
                   className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-7">
                     <div className="bg-green-100 p-3 rounded-lg">
                       <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -161,7 +219,7 @@ const StudentsDashboard = () => {
                   onClick={() => setCurrentView('ai-suggestions')}
                   className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-7">
                     <div className="bg-purple-100 p-3 rounded-lg">
                       <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -177,7 +235,7 @@ const StudentsDashboard = () => {
                   onClick={() => setCurrentView('resume')}
                   className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-7">
                     <div className="bg-orange-100 p-3 rounded-lg">
                       <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
