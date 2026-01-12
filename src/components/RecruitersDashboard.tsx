@@ -33,7 +33,7 @@ const RecruitersDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {currentView === 'dashboard' && (
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Recruiters Dashboard</h2>
+            <h2 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {/* Post New Internship Card */}
