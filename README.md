@@ -1,4 +1,4 @@
-### 🚀 Skill-TERN 
+# 🚀 Skill-TERN 
 
 **AI-Powered Internship Matching Platform**
 
