@@ -1,4 +1,4 @@
-🚀 Skill-TERN 
+### 🚀 Skill-TERN 
 
 **AI-Powered Internship Matching Platform**
 
@@ -126,16 +126,6 @@ Designed to feel like a **real startup product**, not a college demo.
 
 ---
 
-## 📁 Project Structure
-
-src/
-├── components/
-│    ├── Login.tsx
-│    ├── StudentsDashboard.tsx
-│    └── RecruitersDashboard.tsx
-├── App.tsx
-├── main.tsx
-└── index.css
 
 ## Setup
 
