@@ -1,10 +1,5 @@
-# Skill-TERN Login Page
+🚀 Skill-TERN 
 
-A modern React TypeScript login component with Tailwind CSS, featuring a frosted glass effect and role-based authentication.
-
-## Features
-
-- **Role To# 🚀 Skill-TERN  
 **AI-Powered Internship Matching Platform**
 
 Skill-TERN is an intelligent internship discovery and application platform that helps students get matched with the right opportunities using AI-based profile analysis, resume scoring, and smart recommendations.
