@@ -36,15 +36,6 @@ const StudentsDashboard = ({ isDarkMode, toggleDarkMode }: ThemeProps) => {
     { id: 2, title: 'Data Science Intern', company: 'Data Inc', status: 'pending' },
   ]);
 
-  const radarScores = {
-  Resume: 72,
-  Skills: 78,
-  Projects: 60,
-  "AI Match": 75,
-  Consistency: 55,
-  Interview: 68,
-};
-
 const insights = [
   {
     type: "good",
@@ -466,68 +457,180 @@ const actions = [
 
         {currentView === 'resume' && (
           <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
-            <div className="flex items-center gap-4 mb-6">
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
               <button
                 onClick={() => setCurrentView('dashboard')}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 dark:text-sky-400 hover:text-blue-800 dark:hover:text-sky-300 transition-colors"
               >
                 ← Back to Dashboard
               </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">My Resume</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div
-                onClick={() => setCurrentView('edit-cv')}
-                className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  <h3 className="text-lg font-bold">Edit CV / AI Suggestions</h3>
-                </div>
-                <p className="text-blue-100 text-sm">Edit your resume with AI-powered suggestions</p>
-              </div>
-
-              <div
-                onClick={() => setCurrentView('connect-profiles')}
-                className="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                  <h3 className="text-lg font-bold">Connect Profiles</h3>
-                </div>
-                <p className="text-green-100 text-sm">Link Leetcode, Codeforces, etc.</p>
-              </div>
-
-              <div
-                onClick={() => setCurrentView('add-projects')}
-                className="bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  <h3 className="text-lg font-bold">Add Projects</h3>
-                </div>
-                <p className="text-orange-100 text-sm">Showcase your work and projects</p>
-              </div>
+              <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">My Resume</h2>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Current Resume</h3>
-              <div className="space-y-2 text-gray-600">
-                <p><strong>Name:</strong> Your Name</p>
-                <p><strong>Email:</strong> your.email@example.com</p>
-                <p><strong>Skills:</strong> React, TypeScript, Node.js</p>
-                <p><strong>Experience:</strong> 2 years</p>
+            {/* Main Layout - 2 Column Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+              {/* LEFT COLUMN - Profile Overview */}
+              <div className="space-y-6">
+
+                {/* Profile Card */}
+                <div className="bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300">
+                  <div className="flex items-center gap-4 mb-6">
+                    {/* Avatar with Initials */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      YN
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">Your Name</h3>
+                      <p className="text-slate-600 dark:text-slate-400">Aspiring Software Engineer</p>
+                    </div>
+                  </div>
+
+                  {/* Skills Chips */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">Skills</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {['React', 'TypeScript', 'Node.js', 'Python', 'JavaScript'].map((skill) => (
+                        <span key={skill} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Experience Section */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">Experience</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white">Frontend Developer Intern</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Tech Company • 2023 - Present</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white">Personal Projects</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Self-taught development • 2022 - 2023</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Linked Profiles Section */}
+                <div className="bg-white/50 backdrop-blur-lg border border-white/20 rounded-xl shadow-sm p-4 hover:shadow-md transition-all">
+                  <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">Linked Profiles</h4>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'GitHub', icon: 'GH', connected: false },
+                      { name: 'LeetCode', icon: 'LC', connected: false },
+                      { name: 'Codeforces', icon: 'CF', connected: true },
+                      { name: 'LinkedIn', icon: 'LI', connected: false }
+                    ].map((platform) => (
+                      <div key={platform.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">
+                            {platform.icon}
+                          </span>
+                          <span className="font-medium text-slate-900 dark:text-white">{platform.name}</span>
+                        </div>
+                        <button
+                          onClick={() => setCurrentView('connect-profiles')}
+                          className={`text-sm font-medium px-3 py-1 rounded-lg transition-colors ${
+                            platform.connected
+                              ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                              : 'text-blue-600 dark:text-sky-400 hover:underline'
+                          }`}
+                        >
+                          {platform.connected ? 'Connected' : 'Connect'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-1">
+                    <span className="text-green-500">+5</span> score boost per connected profile
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setCurrentView('edit-cv')}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                  >
+                    Improve Resume
+                  </button>
+                  <button
+                    onClick={() => setCurrentView('add-projects')}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                  >
+                    Add Projects
+                  </button>
+                </div>
+
               </div>
-              <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                Download Resume
-              </button>
+
+              {/* RIGHT COLUMN - AI Insights & Score */}
+              <div className="space-y-6">
+
+                {/* AI Resume Analysis Card */}
+                <div className="bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🤖</span>
+                    AI Resume Analysis
+                  </h3>
+
+                  {/* Overall Score */}
+                  <div className="text-center mb-8">
+                    <div className="text-6xl font-bold text-blue-600 dark:text-sky-400 mb-2">71</div>
+                    <p className="text-slate-600 dark:text-slate-400 font-medium">Overall Score</p>
+                  </div>
+
+                  {/* Insights */}
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800">
+                      <span className="text-green-600 text-xl">✓</span>
+                      <div>
+                        <p className="font-semibold text-green-800 dark:text-green-300">Strength</p>
+                        <p className="text-sm text-green-700 dark:text-green-400">Strong technical skills and project experience</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-100 dark:border-orange-800">
+                      <span className="text-orange-600 text-xl">⚠</span>
+                      <div>
+                        <p className="font-semibold text-orange-800 dark:text-orange-300">Weakness</p>
+                        <p className="text-sm text-orange-700 dark:text-orange-400">Limited professional experience</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                      <span className="text-blue-600 text-xl">💡</span>
+                      <div>
+                        <p className="font-semibold text-blue-800 dark:text-blue-300">Suggestion</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-400">Add more quantifiable achievements</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Strength Indicator */}
+                <div className="bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300">
+                  <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">Profile Strength</h4>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full" style={{ width: '71%' }}></div>
+                    </div>
+                    <span className="text-lg font-bold text-blue-600 dark:text-sky-400">71%</span>
+                  </div>
+                </div>
+
+              </div>
+
             </div>
           </div>
         )}
