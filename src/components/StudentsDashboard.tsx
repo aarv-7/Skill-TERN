@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ThemeProps } from '../App';
 import {
   RadarChart,
   PolarGrid,
@@ -22,7 +23,7 @@ const radarData = [
 
 type View = 'dashboard' | 'explore' | 'applications' | 'applied-internship' | 'ai-recommendation' | 'ai-suggestions' | 'resume' | 'edit-cv' | 'connect-profiles' | 'add-projects';
 
-const StudentsDashboard = () => {
+const StudentsDashboard = ({ isDarkMode, toggleDarkMode }: ThemeProps) => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [internships] = useState([
@@ -75,57 +76,73 @@ const actions = [
 ];
 
   return (
-    <div className="min-h-[100vh] w-full">
+    <div className="min-h-screen w-full relative z-10 pt-4 pb-12">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-lg shadow-md border-b border-white/20">
+      <header className="glass-panel mx-6 mb-8 mt-2 sticky top-4 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-blue-600">Skill-TERN</h1>
-            <span className="text-sm text-gray-600 bg-blue-100 px-3 py-1 rounded-full">Student</span>
+            <h1 className="text-2xl font-extrabold text-blue-700 dark:text-sky-400 tracking-tight">Skill-TERN</h1>
+            <span className="text-xs font-semibold text-blue-700 dark:text-sky-300 bg-blue-100/80 dark:bg-sky-900/50 backdrop-blur-sm px-3 py-1 rounded-full border border-blue-200 dark:border-sky-700">Student Area</span>
           </div>
-          <button
-            onClick={() => navigate('/')}
-            className="px-4 py-2 text-gray-700 hover:text-blue-600 transition-colors"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              className="flex items-center justify-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              {isDarkMode ? (
+                <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-blue-50/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-300"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-7">
-        <div className="flex gap-6 items-stretch"></div>
+      <div className="max-w-7xl mx-auto px-6">
         {currentView === 'dashboard' && (
-          <div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h2>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-8 tracking-tight">Dashboard Overview</h2>
             
             {/* Main Container - Split Left and Right */}
-            <div className="flex gap-6 h-[calc(100vh-200px)]">
+            <div className="flex gap-6 h-[calc(100vh-220px)]">
               
               {/* LEFT HALF - RADAR GRAPH SECTION */}
-              <div className="w-1/2 bg-white rounded-2xl p-6 shadow-md flex flex-col h-full">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-1">
+              <div className="w-1/2 glass-panel p-8 flex flex-col h-full hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5 transition-all duration-300">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">
                   Profile Evaluation
                 </h3>
-                <p className="text-lg text-gray-500 mb-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-medium">
                   AI-based multi-dimensional student assessment
                 </p>
 
                 <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={radarData}>
-                    <PolarGrid stroke="#e5e7eb" />
-                     <PolarAngleAxis dataKey="metric" tick={{ fill: "#23272eff", fontSize: 17 }}/>
+                    <PolarGrid stroke={isDarkMode ? "#334155" : "#e5e7eb"} />
+                     <PolarAngleAxis dataKey="metric" tick={{ fill: isDarkMode ? "#e2e8f0" : "#23272eff", fontSize: 17 }}/>
                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false}/>
-                      <Tooltip />
+                      <Tooltip contentStyle={{ backgroundColor: isDarkMode ? "#1e293b" : "#fff", borderColor: isDarkMode ? "#334155" : "#e5e7eb", color: isDarkMode ? "#fff" : "#000" }}/>
 
                      <Radar
                      name="Score"
                      dataKey="score"
-                     stroke="#2563eb"
-                     fill="#2563eb"
+                     stroke="#38bdf8"
+                     fill="#38bdf8"
                      fillOpacity={0.4}
                      />
-                      <Legend />
+                      <Legend wrapperStyle={{ color: isDarkMode ? "#e2e8f0" : "#000" }}/>
                       </RadarChart>
                     </ResponsiveContainer>
                     </div>
@@ -141,36 +158,38 @@ const actions = [
 
               {/* RIGHT HALF - BUTTONS SECTION */}
               <div className="w-1/2 flex justify-start">
-              <div className="flex flex-col-2 gap-10 w-[540px]">
-                <div className="grid grid-cols-2 gap-5">
+              <div className="w-full flex flex-col gap-6">
+                <div className="grid grid-cols-2 gap-4">
                   {/* AI INSIGHTS CARD */}
-              <div className="col-span-2 bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-md border border-white/70">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">🧠 AI Insights</h3> 
+              <div className="col-span-2 bg-gradient-to-br from-indigo-50/90 to-blue-50/90 dark:from-indigo-900/40 dark:to-blue-900/40 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-indigo-100/50 dark:border-indigo-800/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
+                <svg className="w-32 h-32 text-indigo-600 dark:text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <h3 className="text-sm font-bold text-indigo-900 mb-4 flex items-center gap-2 uppercase tracking-wider relative z-10">
+                <span className="p-1.5 bg-indigo-100 rounded-lg">✨</span> Smart AI Insights
+              </h3> 
 
               {/* Insights */}
-              <ul className="space-y-2 mb-4">
+              <ul className="space-y-3 mb-6 relative z-10">
               {insights.map((insight, index) => (
              <li
              key={index}
-             className={`text-sm flex items-start gap-2 ${ insight.type === "good" ? "text-green-700" : insight.type === "warning" ? "text-orange-700": "text-blue-700"}`}
+             className={`text-sm flex items-start gap-3 p-3 rounded-xl bg-white/60 shadow-sm border ${ insight.type === "good" ? "border-green-100 text-green-800" : insight.type === "warning" ? "border-amber-100 text-amber-800" : "border-blue-100 text-blue-800"}`}
              >
-            <span>•</span>
-            <span>{insight.text}</span>
+            <span className="text-lg leading-none mt-0.5">{insight.type === "good" ? "✓" : insight.type === "warning" ? "!" : "i"}</span>
+            <span className="font-medium">{insight.text}</span>
             </li>
             ))} </ul>
 
-           {/* Divider */}
-           <div className="h-px bg-gray-200 my-3" />
-
            {/* Next Actions */}
-           <h4 className="text-sm font-semibold text-gray-700 mb-2"> 🎯 Next Best Actions </h4>
+           <h4 className="text-xs font-bold text-indigo-800 mb-3 uppercase tracking-wider relative z-10"> 🎯 Recommended Next Steps </h4>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 relative z-10">
             {actions.map((item, index) => (
             <button
              key={index}
              onClick={item.action}
-              className="text-xs px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+              className="text-xs font-semibold px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-md hover:scale-[1.02] transition-all duration-300 shadow-sm">
              {item.label}
              </button>
               ))}
@@ -180,65 +199,65 @@ const actions = [
                 {/* Explore Internships Card */}
                 <div
                   onClick={() => setCurrentView('explore')}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/80 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                  className="glass-panel p-5 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-3 mb-7">
-                    <div className="bg-blue-100 p-3 rounded-lg">
-                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-blue-50 dark:bg-blue-900/40 p-3 rounded-xl group-hover:scale-105 transition-transform duration-300">
+                      <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800">Explore Internships</h3>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Explore Internships</h3>
                   </div>
-                  <p className="text-gray-600 text-sm">Browse available internship opportunities</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Browse available internship opportunities</p>
                 </div>
 
                 {/* My Applications Card */}
                 <div
                   onClick={() => setCurrentView('applications')}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                  className="glass-panel p-5 cursor-pointer hover:shadow-2xl hover:shadow-green-500/10 dark:hover:shadow-green-500/5 hover:-translate-y-1 transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-3 mb-7">
-                    <div className="bg-green-100 p-3 rounded-lg">
-                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-green-50 dark:bg-green-900/40 p-3 rounded-xl group-hover:scale-105 transition-transform duration-300">
+                      <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800">My Applications</h3>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">My Applications</h3>
                   </div>
-                  <p className="text-gray-600 text-sm">Track your internship applications</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Track your internship applications</p>
                 </div>
 
                 {/* AI Suggestions Card */}
                 <div
                   onClick={() => setCurrentView('ai-suggestions')}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                  className="glass-panel p-5 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/10 dark:hover:shadow-purple-500/5 hover:-translate-y-1 transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-3 mb-7">
-                    <div className="bg-purple-100 p-3 rounded-lg">
-                      <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-purple-50 dark:bg-purple-900/40 p-3 rounded-xl group-hover:scale-105 transition-transform duration-300">
+                      <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800">AI Suggestions</h3>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">AI Suggestions</h3>
                   </div>
-                  <p className="text-gray-600 text-sm">Get personalized internship recommendations</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Get personalized internship recommendations</p>
                 </div>
 
                 {/* My Resume Card */}
                 <div
                   onClick={() => setCurrentView('resume')}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/20 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                  className="glass-panel p-5 cursor-pointer hover:shadow-2xl hover:shadow-orange-500/10 dark:hover:shadow-orange-500/5 hover:-translate-y-1 transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-3 mb-7">
-                    <div className="bg-orange-100 p-3 rounded-lg">
-                      <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-orange-50 dark:bg-orange-900/40 p-3 rounded-xl group-hover:scale-105 transition-transform duration-300">
+                      <svg className="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800">My Resume</h3>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">My Resume</h3>
                   </div>
-                  <p className="text-gray-600 text-sm">Manage and enhance your resume</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Manage and enhance your resume</p>
                 </div>
                 </div>
               </div>
@@ -249,16 +268,16 @@ const actions = [
         )}
 
         {currentView === 'explore' && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
+          <div className="glass-panel p-8">
             <div className="flex items-center gap-4 mb-6">
               <button
                 onClick={() => setCurrentView('dashboard')}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 dark:text-sky-400 hover:text-blue-800 dark:hover:text-sky-300"
               >
                 ← Back to Dashboard
               </button>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Explore Internships</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">Explore Internships</h2>
             <div className="space-y-4">
               {internships.map((internship) => (
                 <div key={internship.id} className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">

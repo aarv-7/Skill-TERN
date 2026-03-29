@@ -1,13 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ThemeProps } from '../App';
 
 export type UserRole = 'student' | 'recruiter';
 
-interface LoginProps {
-  onLogin: (role: UserRole) => void;
-}
+interface LoginProps extends ThemeProps {}
 
-const Login = () => {
+const Login = ({ isDarkMode, toggleDarkMode }: LoginProps) => {
   const navigate = useNavigate();
   const [role, setRole] = useState<UserRole>('student');
   const [email, setEmail] = useState('');
@@ -68,45 +67,66 @@ const Login = () => {
 
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Blurred Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)',
-        }}
-      >
-        <div className="absolute inset-0 backdrop-blur-md bg-black/20"></div>
+    <div className="min-h-screen flex flex-col items-center justify-center relative z-10 pt-10 pb-20">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6 z-50">
+        <button
+          type="button"
+          onClick={toggleDarkMode}
+          className="flex items-center gap-2 px-4 py-2 rounded-full glass-panel hover:-translate-y-0.5 transition-all duration-300 shadow-md group"
+        >
+          {isDarkMode ? (
+            <>
+              <svg className="w-5 h-5 text-yellow-300 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span className="text-sm font-semibold text-slate-200">Light</span>
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5 text-indigo-600 group-hover:-rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <span className="text-sm font-semibold text-indigo-900">Dark</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-md px-6">
+      <div className="relative z-20 w-full max-w-md px-6">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-2">Skill-TERN</h1>
-          <p className="text-white text-sm">Smart AI-assisted internship portal with intelligent matching, automated screening, and real-time application tracking.</p>
+        <div className="text-center mb-10">
+          <div className="inline-flex justify-center items-center mb-6 w-16 h-16 rounded-2xl bg-white/60 dark:bg-slate-800/80 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-xl">
+             <svg className="w-8 h-8 text-blue-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+             </svg>
+          </div>
+          <h1 className="text-5xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">Skill-TERN</h1>
+          <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed px-4">Smart AI-assisted internship portal with intelligent matching, automated screening, and real-time application tracking.</p>
         </div>
 
         {/* Login Form */}
         <form 
           onSubmit={handleLogin}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20"
+          className="glass-panel p-8"
         >
-          <h2 className="text-2xl font-bold text-black mb-4">Login</h2>
-          <p className="text-sm text-gray-600 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-200">
-            💡 <strong>Demo Credentials</strong><h2>Student → student@skilltern.com / student123<br />
-                   Recruiter → recruiter@skilltern.com / recruiter123</h2>
-          </p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Welcome back</h2>
+          <div className="text-sm text-gray-600 dark:text-slate-400 mb-6 bg-blue-50 dark:bg-slate-800/50 p-3 rounded-lg border border-blue-200 dark:border-white/5">
+            💡 <strong>Demo Credentials</strong><br />
+            Student → student@skilltern.com / student123<br />
+            Recruiter → recruiter@skilltern.com / recruiter123
+          </div>
 
           {/* Role Toggle */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex p-1 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl border border-white/60 dark:border-white/5 shadow-sm mb-6">
             <button
               type="button"
               onClick={() => setRole('student')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 ${
                 role === 'student'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 border border-gray-300'
+                  ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-white shadow-md scale-[1.02] ring-1 ring-black/5 dark:ring-white/10'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-700/50'
               }`}
             >
               <svg 
@@ -127,10 +147,10 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setRole('recruiter')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 ${
                 role === 'recruiter'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 border border-gray-300'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-white shadow-md scale-[1.02] ring-1 ring-black/5 dark:ring-white/10'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-700/50'
               }`}
             >
               <svg 
@@ -154,71 +174,71 @@ const Login = () => {
           <div className="mb-4">
             <label 
               htmlFor="email" 
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
             >
-              Email:
+              Email address
             </label>
             <input
-              type="text"
+              type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-3.5 rounded-xl border border-white/40 dark:border-white/10 bg-white/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 shadow-sm dark:text-white dark:placeholder-slate-500"
               placeholder="Enter your email"
             />
           </div>
 
           {/* Password Field */}
-          <div className="mb-4">
+          <div className="mb-6">
             <label 
               htmlFor="password" 
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
             >
-              Password:
+              Password
             </label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-3.5 rounded-xl border border-white/40 dark:border-white/10 bg-white/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 shadow-sm dark:text-white dark:placeholder-slate-500"
               placeholder="Enter your password"
             />
           </div>
 
           {/* Remember Me and Forgot Password */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8">
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-blue-600 border-gray-300 dark:border-slate-600 rounded focus:ring-blue-500 dark:bg-slate-800"
               />
-              <span className="ml-2 text-sm text-gray-700">Remember Me</span>
+              <span className="ml-2 text-sm text-slate-700 dark:text-slate-300">Remember Me</span>
             </label>
             <a 
               href="#" 
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+              className="text-sm text-blue-600 dark:text-sky-400 hover:text-blue-800 dark:hover:text-sky-300 hover:underline"
             >
               Forgot Password
             </a>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-lg"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3.5 px-6 rounded-xl font-medium hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300"
             >
-              Login
+              Login securely
             </button>
             <button
               type="button"
               onClick={handleSignUp}
-              className="flex-1 bg-transparent border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="w-full bg-white/60 dark:bg-slate-800/60 border border-white/80 dark:border-white/20 backdrop-blur-md text-slate-700 dark:text-white py-3.5 px-6 rounded-xl font-medium hover:bg-white dark:hover:bg-slate-700 hover:scale-[1.02] hover:shadow-lg transition-all duration-300"
             >
-              Sign-Up
+              Create an account
             </button>
           </div>
         </form>
