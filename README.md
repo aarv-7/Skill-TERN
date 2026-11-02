@@ -138,6 +138,18 @@ npm start
 
 The Express server serves the built `dist/` frontend and API on port `5001`.
 
+## Deploy: Vercel frontend + Render API
+
+The repository includes a Vercel SPA configuration and a Render Blueprint. The frontend calls the API URL configured at build time; the Supabase secret stays on Render.
+
+1. Push the project to a Git provider connected to both Vercel and Render.
+2. Create the Render service from [`render.yaml`](render.yaml). Add `SUPABASE_SECRET_KEY` in Render's environment settings. After creating the Vercel project, set `CORS_ORIGINS` to its exact production origin (for example, `https://your-project.vercel.app`). Render generates `JWT_SECRET` for the service and checks `/api/health`.
+3. Import the repository into Vercel with the repository root as the project root. Add `VITE_API_BASE_URL` for Production with the Render service API URL, such as `https://your-api.onrender.com/api`, then deploy.
+4. Confirm the Vercel production origin is in Render's `CORS_ORIGINS`, and redeploy the API if you changed its environment variables.
+5. Check `https://your-api.onrender.com/api/health`; it should report `"database":"supabase"`. Open the Vercel URL and sign in with a demo account.
+
+The included Render Blueprint uses the free web-service plan in Singapore. Free Render services spin down after 15 minutes without incoming traffic and can take about a minute to start on the next request; use a paid always-on plan if that delay is unsuitable for a live event. See [Render's free service limits](https://render.com/docs/free) and [Vercel's Vite deployment guide](https://vercel.com/docs/frameworks/frontend/vite).
+
 ### Run checks
 
 ```bash

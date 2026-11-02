@@ -16,6 +16,10 @@ const internshipRoutes = require('./routes/internshipRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+const corsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is required. Set it in server/.env before starting the API.');
@@ -23,8 +27,16 @@ if (!process.env.JWT_SECRET) {
 if (process.env.JWT_SECRET.length < 32) {
   throw new Error('JWT_SECRET must contain at least 32 characters.');
 }
+if (process.env.NODE_ENV === 'production' && corsOrigins.length === 0) {
+  throw new Error('CORS_ORIGINS is required in production. Add the deployed frontend origin.');
+}
 
-app.use(cors());
+app.use(cors(corsOrigins.length ? {
+  origin(origin, callback) {
+    if (!origin || corsOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin is not allowed by CORS'));
+  }
+} : {}));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
