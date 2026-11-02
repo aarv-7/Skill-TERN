@@ -2,24 +2,32 @@
   "name": "skill-tern",
   "version": "1.0.0",
   "private": true,
+  "description": "Skill-TERN — Identify your skill gaps → Swap skills with peers to master them → Earn credits and boost your readiness → Get matched with internships.",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run server\" \"npm run client\"",
+    "server": "cd server && node server.js",
+    "client": "vite",
+    "build": "tsc && vite build",
+    "test": "node --test server/test/*.test.js",
+    "preview": "vite preview",
+    "start": "cd server && node server.js",
+    "seed": "cd server && node seed.js"
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.30.2"
+    "react-router-dom": "^6.30.2",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.14",
+    "concurrently": "^8.2.2",
     "postcss": "^8.4.24",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.0.0",
     "vite": "^4.4.0"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
   }
 }

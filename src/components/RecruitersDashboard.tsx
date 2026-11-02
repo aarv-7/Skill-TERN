@@ -1,372 +1,588 @@
-import { useState } from 'react';
+import { useState, useEffect, FormEvent, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProps } from '../App';
+import { api, getCurrentUser, clearToken } from '../api/client';
 
-type View = 'dashboard' | 'post-internship' | 'view-applications' | 'ai-shortlisting' | 'manual-screening' | 'statistics';
+type View = 'dashboard' | 'post-internship' | 'view-applications' | 'shortlisted';
+
+const SLOGAN = "Identify your skill gaps → Swap skills with peers to master them → Earn credits and boost your readiness → Get matched with internships.";
 
 const RecruitersDashboard = ({ isDarkMode, toggleDarkMode }: ThemeProps) => {
   const navigate = useNavigate();
+  const navRef = useRef<HTMLElementTagNameMap['nav'] | null>(null);
   const [currentView, setCurrentView] = useState<View>('dashboard');
-  const [applications] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', status: 'pending', score: 85 },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'pending', score: 92 },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'rejected', score: 65 },
-  ]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [user] = useState<any>(getCurrentUser());
+
+  // Data states
+  const [applications, setApplications] = useState<any[]>([]);
+  const [internships, setInternships] = useState<any[]>([]);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  // Form states for posting internship
+  const [title, setTitle] = useState('');
+  const [company, setCompany] = useState(user?.company || '');
+  const [location, setLocation] = useState('Pune / Hybrid');
+  const [type, setType] = useState('Internship');
+  const [duration, setDuration] = useState('3 Months');
+  const [stipend, setStipend] = useState('₹25,000 / month');
+  const [requiredSkills, setRequiredSkills] = useState('React, TypeScript, Node.js, Problem Solving');
+  const [description, setDescription] = useState('');
+
+  const switchView = (view: View) => {
+    setCurrentView(view);
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  };
+
+  const showToast = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [appRes, intRes] = await Promise.all([
+        api.applications.getRecruiter().catch(() => ({ applications: [] })),
+        api.internships.getMine().catch(() => ({ internships: [] }))
+      ]);
+
+      setApplications(appRes?.applications || []);
+      setInternships(intRes?.internships || []);
+    } catch (err) {
+      console.warn('Error loading recruiter data:', err);
+    }
+  };
+
+  const handlePostInternship = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!title || !company) {
+      alert('Title and company are required.');
+      return;
+    }
+
+    try {
+      await api.internships.create({
+        title,
+        company,
+        location,
+        type,
+        duration,
+        stipend,
+        requiredSkills: requiredSkills.split(',').map((s) => s.trim()).filter(Boolean),
+        description
+      });
+
+      showToast(` New Internship "${title}" published successfully!`);
+      setTitle('');
+      setDescription('');
+      switchView('dashboard');
+      loadData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to post internship');
+    }
+  };
+
+  const handleUpdateStatus = async (appId: string, newStatus: string) => {
+    try {
+      await api.applications.updateStatus(appId, newStatus);
+      showToast(`Applicant status updated to ${newStatus.toUpperCase()}`);
+      loadData();
+    } catch (err: any) {
+      showToast(err.message || 'Could not update applicant status. Please try again.');
+    }
+  };
+
+  const shortlistedCount = applications.filter(a => a.status === 'shortlisted' || a.status === 'accepted').length;
+  const averageRating = applications.length
+    ? (applications.reduce((sum, application) => sum + Number(application.applicant?.rating || 0), 0) / applications.length).toFixed(1)
+    : '—';
+  const visibleApplications = applications.filter(
+    (application) => currentView !== 'shortlisted' || application.status === 'shortlisted' || application.status === 'accepted'
+  );
 
   return (
-    <div className="min-h-screen w-full relative z-10 pt-4 pb-12">
+    <div className="app-dashboard min-h-screen w-full relative z-10 pt-2 pb-16">
+      {/* Toast Notification */}
+      {notification && (
+        <div className="fixed top-5 right-6 z-50 max-w-md bg-indigo-600 text-white p-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in duration-300">
+
+          <span className="text-sm font-semibold">{notification}</span>
+          <button onClick={() => setNotification(null)} aria-label="Dismiss notification" className="ml-auto rounded-full px-2 py-1 text-white/80 hover:bg-white/15 hover:text-white">×</button>
+        </div>
+      )}
+
       {/* Header */}
-      <header className="glass-panel mx-6 mb-8 mt-2 sticky top-4 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-extrabold text-indigo-700 dark:text-indigo-400 tracking-tight">Skill-TERN</h1>
-            <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-100/80 dark:bg-indigo-900/50 backdrop-blur-sm px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-700">Recruiter Portal</span>
+      <header className="dashboard-header glass-panel mx-4 sm:mx-6 mb-6 mt-2 sticky top-3 z-40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-3 sm:px-5 py-3 flex flex-nowrap items-center gap-3 min-w-0">
+          <div className="flex shrink-0 items-center gap-3 cursor-pointer" onClick={() => switchView('dashboard')}>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-semibold text-black dark:text-white tracking-tight">Skill-TERN</h1>
+                <span className="dashboard-brand-tag hidden xl:inline-flex text-[10px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-100/80 dark:bg-indigo-900/50 px-2.5 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                  Recruiter & Hiring Portal
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+
+        <nav ref={navRef} className="dashboard-nav flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+          {[
+            { id: 'dashboard', label: ' Recruiter Overview', mobileLabel: 'Overview' },
+            { id: 'view-applications', label: ` Candidate Applicants (${applications.length})`, mobileLabel: `Applicants (${applications.length})` },
+            { id: 'shortlisted', label: ` Shortlisted (${shortlistedCount})`, mobileLabel: `Shortlist (${shortlistedCount})` },
+            { id: 'post-internship', label: ' Post New Internship', mobileLabel: 'Post Role' },
+          ].map((tab) => (
             <button
-              onClick={toggleDarkMode}
-              className="flex items-center justify-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              key={tab.id}
+              onClick={() => switchView(tab.id as View)}
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all duration-200 ${
+                currentView === tab.id
+                  ? 'bg-indigo-600 text-white shadow-md scale-[1.02]'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'
+              }`}
             >
-              {isDarkMode ? (
-                <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
+              <span className="hidden md:inline">{tab.label}</span>
+              <span className="md:hidden">{tab.mobileLabel}</span>
             </button>
+          ))}
+        </nav>
+          <button type="button" className="nav-scroll-hint shrink-0" aria-label="Show more navigation tabs" title="Scroll to more tabs" onClick={() => navRef.current?.scrollBy({ left: 240, behavior: 'smooth' })}>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m7.5 4 6 6-6 6" /></svg>
+          </button>
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => navigate('/')}
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-300"
+              type="button"
+              onClick={toggleDarkMode}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="theme-toggle flex h-10 w-10 items-center justify-center rounded-full text-slate-600 dark:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
             >
-              Sign out
+              <svg className={`h-5 w-5 ${isDarkMode ? 'theme-icon is-sun' : 'theme-icon is-moon'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {isDarkMode ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" /></> : <path d="M20.8 14.1A8.4 8.4 0 0 1 9.9 3.2 8.6 8.6 0 1 0 20.8 14.1Z" />}
+              </svg>
+            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileOpen((open) => !open)}
+                aria-expanded={profileOpen}
+                aria-label="Open profile details"
+                className="profile-trigger flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white"
+              >
+                {(user?.name || 'Recruiter').split(/\s+/).map((part: string) => part[0]).slice(0, 2).join('').toUpperCase()}
+              </button>
+              {profileOpen && (
+                <div className="profile-popover absolute right-0 top-full z-50 mt-3 w-72 rounded-xl border p-4 shadow-xl" role="dialog" aria-label="Profile details">
+                  <div className="font-semibold text-slate-900 dark:text-white">{user?.name || 'Recruiter'}</div>
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{user?.company || 'Tech Corp'} · Recruiter profile</div>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => { clearToken(); navigate('/'); }}
+              aria-label="Sign out"
+              title="Sign out"
+              className="signout-control px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl"
+            >
+              <span className="signout-label">Sign out</span>
+              <svg className="signout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3" /><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>
             </button>
           </div>
         </div>
+
+
       </header>
 
-      <div className="max-w-7xl mx-auto px-6">
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+
+        {/* Unified Slogan Strip */}
+        <div className="mb-6 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950 border border-indigo-200/50 dark:border-indigo-700/30 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+                Hiring with Skill-TERN
+              </div>
+              <div className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                {SLOGAN}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => switchView('post-internship')}
+            className="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-md transition-all whitespace-nowrap"
+          >
+            + Post Placement Role
+          </button>
+        </div>
+
+        {/* ── 1. DASHBOARD OVERVIEW ── */}
         {currentView === 'dashboard' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-8 tracking-tight">Recruiter Overview</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Post New Internship Card */}
-              <div
-                onClick={() => setCurrentView('post-internship')}
-                className="glass-panel p-6 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-blue-50 dark:bg-blue-900/40 p-3 rounded-2xl group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                    <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Post Placement</h3>
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Create and publish a new internship opportunity</p>
+          <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Quick Metrics Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="glass-panel p-5 rounded-xl">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Total Applicants</span>
+                <div className="text-3xl font-semibold text-slate-900 dark:text-white mt-1">{applications.length}</div>
+                <span className="text-[10px] text-emerald-600 font-semibold mt-1 block">Student applications</span>
               </div>
 
-              {/* View Applications Card */}
-              <div
-                onClick={() => setCurrentView('view-applications')}
-                className="glass-panel p-6 cursor-pointer hover:shadow-2xl hover:shadow-green-500/10 dark:hover:shadow-green-500/5 hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-green-50 dark:bg-green-900/40 p-3 rounded-2xl group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                    <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Applications</h3>
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Review and manage all internship applications</p>
+              <div className="glass-panel p-5 rounded-xl">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Shortlisted / offered</span>
+                <div className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400 mt-1">{shortlistedCount}</div>
+                <span className="text-[10px] text-indigo-500 font-semibold mt-1 block">Updated by your team</span>
               </div>
 
-              {/* Recruitment Statistics Card */}
-              <div
-                onClick={() => setCurrentView('statistics')}
-                className="glass-panel p-6 cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5 hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="bg-indigo-50 dark:bg-indigo-900/40 p-3 rounded-2xl group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                    <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Statistics</h3>
+              <div className="glass-panel p-5 rounded-xl">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Active Listings</span>
+                <div className="text-3xl font-semibold text-purple-600 dark:text-purple-400 mt-1">{internships.length}</div>
+                <span className="text-[10px] text-slate-400 font-semibold mt-1 block">Open roles</span>
+              </div>
+
+              <div className="glass-panel p-5 rounded-xl">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Avg. Profile Rating</span>
+                <div className="text-3xl font-semibold text-amber-500 mt-1">{averageRating}</div>
+                <span className="text-[10px] text-slate-400 font-semibold mt-1 block">Applicant peer ratings</span>
+              </div>
+            </div>
+
+            {/* Candidate Review Feed */}
+            <div className="glass-panel p-6 sm:p-8 rounded-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Recent Candidate Applications</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Fit estimates are heuristics. Profile metrics and peer ratings include demo or self-reported data and should be reviewed directly.
+                  </p>
                 </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">View analytics and insights on your recruitment</p>
+                <button
+                  onClick={() => switchView('view-applications')}
+                  className="text-xs font-semibold text-indigo-600 hover:underline"
+                >
+                  View All ({applications.length}) →
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {applications.length === 0 && <div className="rounded-xl border border-white/50 bg-white/35 p-8 text-center text-sm text-slate-600 dark:text-slate-300">No applications yet. Publish an open role to receive student applications.</div>}
+                {applications.map((app) => (
+                  <div
+                    key={app._id}
+                    className="p-5 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 hover:shadow-lg transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-start gap-4 flex-1">
+                      <img
+                        src={app.applicant?.profileImage || `https://api.dicebear.com/7.x/adventurer/svg?seed=${app.applicant?.name}`}
+                        alt={app.applicant?.name}
+                        className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 dark:border-slate-700"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{app.applicant?.name}</h4>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                            {app.applicant?.erpId ? `Self-reported ID: ${app.applicant.erpId}` : 'No student ID'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          Applied for: <strong>{app.internship?.title || 'Internship'}</strong> • {app.applicant?.email}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                             {app.applicant?.completedSwaps ?? app.verifiedSwaps ?? 0} Completed Peer Swaps
+                          </span>
+                          <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                             {app.applicant?.rating ?? 0} Peer Rating
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-3 py-1 rounded-xl border border-indigo-200 block">
+                          Profile-fit estimate: {app.profileFitScore ?? app.aiMatchScore ?? 0}%
+                        </span>
+                        <span className={`text-[10px] font-semibold uppercase mt-1 block ${
+                          app.status === 'shortlisted' ? 'text-emerald-600' : 'text-blue-600'
+                        }`}>
+                          {app.status}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {app.status !== 'shortlisted' && (
+                          <button
+                            onClick={() => handleUpdateStatus(app._id, 'shortlisted')}
+                            className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md transition-all"
+                          >
+                            Shortlist
+                          </button>
+                        )}
+                        {app.status !== 'accepted' && (
+                          <button
+                            onClick={() => handleUpdateStatus(app._id, 'accepted')}
+                            className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-all"
+                          >
+                            Hire
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
 
+        {/* ── 2. VIEW APPLICATIONS & SHORTLIST ── */}
+        {(currentView === 'view-applications' || currentView === 'shortlisted') && (
+          <div className="glass-panel p-6 sm:p-8 rounded-xl animate-in fade-in duration-300">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+              {currentView === 'shortlisted' ? 'Shortlisted Candidates' : 'Candidate Applications Management'}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+              Fit estimates are heuristics based on the applicant profile, role skills, and completed swaps. They are not AI predictions or hiring recommendations.
+            </p>
+
+            <div className="space-y-4">
+              {visibleApplications.length === 0 && <div className="rounded-xl border border-white/50 bg-white/35 p-8 text-center text-sm text-slate-600 dark:text-slate-300">{currentView === 'shortlisted' ? 'No candidates have been shortlisted yet.' : 'No applications yet. Publish an open role to receive student applications.'}</div>}
+              {visibleApplications.map((app) => (
+                  <div
+                    key={app._id}
+                    className="p-6 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-4"
+                  >
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={app.applicant?.profileImage || `https://api.dicebear.com/7.x/adventurer/svg?seed=${app.applicant?.name}`}
+                          alt={app.applicant?.name}
+                          className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200"
+                        />
+                        <div>
+                          <h4 className="text-base font-semibold text-slate-900 dark:text-white">{app.applicant?.name}</h4>
+                          <span className="text-xs text-slate-500">
+                            {app.applicant?.erpId ? `Self-reported ID: ${app.applicant.erpId}` : 'No student ID'} • {app.applicant?.email} • {app.applicant?.location || 'Location not set'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200">
+                          Profile-fit estimate: {app.profileFitScore ?? app.aiMatchScore ?? 0}%
+                        </span>
+                        <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase ${
+                          app.status === 'shortlisted' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {app.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Radar Profile Breakdown */}
+                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 text-center text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-semibold">Resume Quality</span>
+                        <span className="font-semibold text-blue-600">{app.applicant?.radarMetrics?.resume ?? 0}%</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-semibold">Skills Portfolio</span>
+                        <span className="font-semibold text-blue-600">{app.applicant?.radarMetrics?.skills ?? 0}%</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-semibold">Real-world Projects</span>
+                        <span className="font-semibold text-blue-600">{app.applicant?.radarMetrics?.projects ?? 0}%</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-semibold">Interview Readiness</span>
+                        <span className="font-semibold text-blue-600">{app.applicant?.radarMetrics?.interview ?? 0}%</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-semibold">Consistency Score</span>
+                        <span className="font-semibold text-blue-600">{app.applicant?.radarMetrics?.consistency ?? 0}%</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-semibold">Completed Swaps</span>
+                        <span className="font-semibold text-emerald-600"> {app.applicant?.completedSwaps ?? app.verifiedSwaps ?? 0}</span>
+                      </div>
+                    </div>
+
+                    {/* Cover Note */}
+                    {app.coverLetter && (
+                      <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-slate-800 border border-blue-100 text-xs text-slate-700 dark:text-slate-300">
+                        <strong>Candidate Pitch:</strong> "{app.coverLetter}"
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <button
+                        onClick={() => handleUpdateStatus(app._id, 'shortlisted')}
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
+                      >
+                        Shortlist Candidate
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(app._id, 'accepted')}
+                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold"
+                      >
+                        Extend Offer
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(app._id, 'rejected')}
+                        className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white text-xs font-semibold hover:bg-slate-300"
+                      >
+                        Archive
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── 3. POST NEW INTERNSHIP VIEW ── */}
         {currentView === 'post-internship' && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ← Back to Dashboard
-              </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Post New Internship</h2>
-            <form className="space-y-6">
+          <div className="glass-panel p-6 sm:p-8 rounded-xl animate-in fade-in duration-300 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+              Post Placement / Internship Opportunity
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+              Published roles become discoverable to students. Profile-fit estimates use a transparent heuristic based on self-reported skills and readiness; they are not verified or hiring recommendations.
+            </p>
+
+            <form onSubmit={handlePostInternship} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Internship Title</label>
+                <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                  Internship Title
+                </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                  placeholder="e.g., Software Engineering Intern"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Software Engineering Intern"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
                 />
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="Tech Corp"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                    Location / Mode
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Pune / Hybrid"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                    Employment Type
+                  </label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
+                  >
+                    <option value="Internship">Internship</option>
+                    <option value="Full-time">Full-time Placement</option>
+                    <option value="Remote Project">Remote Project</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                    Duration
+                  </label>
+                  <input
+                    type="text"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    placeholder="6 Months"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                  Stipend
+                </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                  placeholder="Your company name"
+                  value={stipend}
+                  onChange={(e) => setStipend(e.target.value)}
+                  placeholder="₹25,000 / month"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                  Required Skills (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={requiredSkills}
+                  onChange={(e) => setRequiredSkills(e.target.value)}
+                  placeholder="e.g. React, TypeScript, Node.js, C++"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
+                  Role Description & Scope
+                </label>
                 <textarea
-                  rows={6}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                  placeholder="Describe the internship role, responsibilities, and requirements..."
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe key responsibilities, mentorship provided, and eligibility criteria..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs dark:text-white"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                    placeholder="e.g., 3 months"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Stipend</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                    placeholder="e.g., $1000/month"
-                  />
-                </div>
+
+              <div className="flex gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => switchView('dashboard')}
+                  className="flex-1 py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-lg"
+                >
+                  Publish Internship Role
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Required Skills</label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                  placeholder="e.g., React, TypeScript, Node.js"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-lg"
-              >
-                Post Internship
-              </button>
             </form>
-          </div>
-        )}
-
-        {currentView === 'view-applications' && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ← Back to Dashboard
-              </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">View Applications</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div
-                onClick={() => setCurrentView('ai-shortlisting')}
-                className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                  <h3 className="text-xl font-bold">AI Shortlisting</h3>
-                </div>
-                <p className="text-blue-100">Let AI automatically filter and rank applicants</p>
-              </div>
-
-              <div
-                onClick={() => setCurrentView('manual-screening')}
-                className="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                  <h3 className="text-xl font-bold">Manual Screening</h3>
-                </div>
-                <p className="text-green-100">Review rejected applicants manually</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-800">All Applications</h3>
-              {applications.map((app) => (
-                <div key={app.id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{app.name}</h4>
-                      <p className="text-sm text-gray-600">{app.email}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        app.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {app.status}
-                      </span>
-                      <p className="text-sm text-gray-600 mt-1">Score: {app.score}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {currentView === 'ai-shortlisting' && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setCurrentView('view-applications')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ← Back to Applications
-              </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">AI Shortlisting</h2>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
-              <div className="flex items-center gap-3 mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <h3 className="text-xl font-bold text-gray-800">AI-Powered Ranking</h3>
-              </div>
-              <p className="text-gray-700 mb-4">
-                Our AI analyzes applications based on skills, experience, and match quality to provide ranked recommendations.
-              </p>
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                Run AI Shortlisting
-              </button>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-800">Ranked Applications</h3>
-              {[...applications].sort((a, b) => b.score - a.score).map((app) => (
-                <div key={app.id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{app.name}</h4>
-                      <p className="text-sm text-gray-600">{app.email}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                        AI Score: {app.score}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {currentView === 'manual-screening' && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setCurrentView('view-applications')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ← Back to Applications
-              </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Manual Screening of Rejected Applicants</h2>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-              <p className="text-yellow-800">
-                Review rejected applicants to ensure no qualified candidates were missed. Insights from this review can help improve future internship postings.
-              </p>
-            </div>
-            <div className="space-y-4">
-              {applications.filter(app => app.status === 'rejected').map((app) => (
-                <div key={app.id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{app.name}</h4>
-                      <p className="text-sm text-gray-600">{app.email}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        Reconsider
-                      </button>
-                      <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {applications.filter(app => app.status === 'rejected').length === 0 && (
-                <p className="text-gray-600 text-center py-8">No rejected applicants to review.</p>
-              )}
-            </div>
-            <div className="mt-6">
-              <button
-                onClick={() => setCurrentView('post-internship')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Post New Internship (with insights)
-              </button>
-            </div>
-          </div>
-        )}
-
-        {currentView === 'statistics' && (
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-white/20">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ← Back to Dashboard
-              </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Recruitment Statistics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-blue-50 rounded-xl p-6">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">Total Applications</h3>
-                <p className="text-3xl font-bold text-blue-600">24</p>
-              </div>
-              <div className="bg-green-50 rounded-xl p-6">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">Shortlisted</h3>
-                <p className="text-3xl font-bold text-green-600">8</p>
-              </div>
-              <div className="bg-purple-50 rounded-xl p-6">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">Average Score</h3>
-                <p className="text-3xl font-bold text-purple-600">78</p>
-              </div>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Application Trends</h3>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                Chart visualization would go here
-              </div>
-            </div>
           </div>
         )}
       </div>
@@ -375,4 +591,3 @@ const RecruitersDashboard = ({ isDarkMode, toggleDarkMode }: ThemeProps) => {
 };
 
 export default RecruitersDashboard;
-

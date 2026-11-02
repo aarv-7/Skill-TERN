@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <!-- Definitions for Gradients -->
+  <defs>
+    <!-- Light Sky Gradient -->
+    <linearGradient id="nightSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ccf2ff" />
+      <stop offset="40%" stop-color="#b3ecff" />
+      <stop offset="100%" stop-color="#80d4ff" />
+    </linearGradient>
+
+    <!-- Mountain Layer 1 (Farthest back, hazy glow) -->
+    <linearGradient id="mount1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#73c6f5" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#5ab8f0" stop-opacity="0.6" />
+    </linearGradient>
+
+    <!-- Mountain Layer 2 -->
+    <linearGradient id="mount2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#52b3ed" />
+      <stop offset="100%" stop-color="#3fa5e6" />
+    </linearGradient>
+
+    <!-- Mountain Layer 3 -->
+    <linearGradient id="mount3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#40a2e3" />
+      <stop offset="100%" stop-color="#2c94db" />
+    </linearGradient>
+
+    <!-- Mountain Layer 4 -->
+    <linearGradient id="mount4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#318cd6" />
+      <stop offset="100%" stop-color="#217ecb" />
+    </linearGradient>
+
+    <!-- Mountain Layer 5 -->
+    <linearGradient id="mount5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2478be" />
+      <stop offset="100%" stop-color="#1969b0" />
+    </linearGradient>
+
+    <!-- Mountain Layer 6 (Foremost) -->
+    <linearGradient id="mount6" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1864a9" />
+      <stop offset="100%" stop-color="#105094" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Sky -->
+  <rect width="1920" height="1080" fill="url(#nightSky)" />
+
+  <!-- Mountain Range 1 -->
+  <path d="M0,540 C300,520 600,560 960,540 C1320,520 1620,500 1920,510 L1920,1080 L0,1080 Z" fill="url(#mount1)" />
+
+  <!-- Mountain Range 2 -->
+  <path d="M0,580 C350,560 700,600 1100,570 C1500,540 1750,530 1920,545 L1920,1080 L0,1080 Z" fill="url(#mount2)" />
+
+  <!-- Mountain Range 3 -->
+  <path d="M0,630 C280,610 650,650 1000,620 C1350,590 1680,575 1920,590 L1920,1080 L0,1080 Z" fill="url(#mount3)" />
+
+  <!-- Mountain Range 4 -->
+  <path d="M0,690 C400,660 800,710 1250,665 C1600,630 1800,615 1920,630 L1920,1080 L0,1080 Z" fill="url(#mount4)" />
+
+  <!-- Mountain Range 5 -->
+  <path d="M0,760 C320,730 750,800 1150,740 C1550,680 1780,670 1920,685 L1920,1080 L0,1080 Z" fill="url(#mount5)" />
+
+  <!-- Mountain Range 6 (Foreground) -->
+  <path d="M0,840 C250,810 500,880 900,815 C1300,750 1650,735 1920,750 L1920,1080 L0,1080 Z" fill="url(#mount6)" />
+</svg>

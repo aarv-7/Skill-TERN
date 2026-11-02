@@ -1,13 +1,25 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import Login from "./components/Login";
-import RecruitersDashboard from "./components/RecruitersDashboard";
-import StudentsDashboard from "./components/StudentsDashboard";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Suspense, lazy, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+const Login = lazy(() => import("./components/Login"));
+const RecruitersDashboard = lazy(() => import("./components/RecruitersDashboard"));
+const StudentsDashboard = lazy(() => import("./components/StudentsDashboard"));
+import { getCurrentUser } from "./api/client";
 import "./index.css";
 
 export interface ThemeProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+}
+
+function RoleRoute({ role, children }: { role: 'student' | 'recruiter'; children: ReactNode }) {
+  return getCurrentUser()?.role === role ? <>{children}</> : <Navigate to="/" replace />;
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); }, [pathname]);
+  return null;
 }
 
 function App() {
@@ -36,28 +48,24 @@ function App() {
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 font-sans text-slate-900 dark:text-gray-100 transition-colors duration-500">
-      {/* Global Background Elements */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-sky-300/30 dark:bg-purple-900/20 blur-[130px] mix-blend-multiply dark:mix-blend-screen animate-blob"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-300/30 dark:bg-blue-900/20 blur-[130px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-4000"></div>
-      </div>
-      
-      {/* Main Content Area */}
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-950 font-sans text-slate-900 dark:text-gray-100">
       <div className="relative z-10 w-full min-h-screen">
+        <ScrollToTop />
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-slate-600 dark:text-slate-300">Loading Skill-TERN…</div>}>
         <Routes>
           <Route path="/" element={<Login isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />} />
           <Route path="/login" element={<Login isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />} />
           <Route
             path="/recruiter"
-            element={<RecruitersDashboard isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />}
+            element={<RoleRoute role="recruiter"><RecruitersDashboard isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} /></RoleRoute>}
           />
           <Route
             path="/student"
-            element={<StudentsDashboard isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />}
+            element={<RoleRoute role="student"><StudentsDashboard isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} /></RoleRoute>}
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </div>
     </div>
   );
